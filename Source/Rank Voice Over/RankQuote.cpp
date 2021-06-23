@@ -1,7 +1,7 @@
 #include "RankQuote.h"
 
-int RankQuote::m_rank = 0;
-int RankQuote::m_rankSfxID = 1010002;
+uint32_t RankQuote::m_rank = 0;
+uint32_t RankQuote::m_rankSfxID = 1010002;
 bool RankQuote::m_playRankVoice = false;
 
 #if _DEBUG
@@ -50,6 +50,12 @@ void __cdecl getRankSfx()
     {
         // S:40000 - D:40004
         RankQuote::m_rankSfxID = 40004 - RankQuote::m_rank;
+
+        // E-Rank Generations support
+        if (RankQuote::m_rank == 4 && *(uint8_t*)0x15EFE9D == 0x45)
+        {
+            RankQuote::m_rankSfxID = 40005;
+        }
     }
     else
     {
@@ -135,12 +141,8 @@ void __declspec(naked) asmRank()
     }
 }
 
-bool RankQuote::m_enabled = false;
 void RankQuote::applyPatches()
 {
-    if (m_enabled) return;
-    m_enabled = true;
-
     // Grab rank
     WRITE_JUMP(0xE27BBC, asmGetRank);
 
